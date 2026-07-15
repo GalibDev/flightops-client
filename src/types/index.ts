@@ -6,3 +6,4 @@ export type PaymentStatus="pending"|"paid"|"refunded"|"failed";
 export type Booking={_id:string;bookingNumber:string;passengerName:string;passengerEmail:string;flightNumber:string;route:string;seats:number;totalAmount:number;status:BookingStatus;paymentStatus:PaymentStatus;createdAt:string};
 export type Payment={_id:string;transactionId:string;bookingNumber:string;customerEmail:string;amount:number;method:string;status:PaymentStatus;createdAt:string};
 export type AuditEntry={_id:string;actorName:string;actorEmail:string;action:string;resource:string;resourceId?:string;details:string;createdAt:string};
+export type ContactMessage={_id:string;name:string;email:string;subject:string;message:string;status:"unread"|"read";createdAt:string};

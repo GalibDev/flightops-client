@@ -7,6 +7,8 @@ import {
   CreditCard,
   FileClock,
   Loader2,
+  MailOpen,
+  MessageSquareText,
   Plane,
   RefreshCw,
   ShieldCheck,
@@ -15,8 +17,8 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { AdminUser, AuditEntry, Booking, Payment } from "@/types";
-type Tab = "overview" | "users" | "flights" | "bookings" | "payments" | "audit";
+import type { AdminUser, AuditEntry, Booking, ContactMessage, Payment } from "@/types";
+type Tab = "overview" | "users" | "flights" | "bookings" | "payments" | "messages" | "audit";
 type Overview = {
   users: number;
   blocked: number;
@@ -25,6 +27,7 @@ type Overview = {
   revenue: number;
   pendingPayments: number;
   audits: number;
+  unreadMessages: number;
 };
 type AdminFlight = {
   _id: string;
@@ -43,6 +46,7 @@ const tabs: [Tab, string, typeof Activity][] = [
   ["flights", "Flight approvals", Plane],
   ["bookings", "Bookings", BookOpenCheck],
   ["payments", "Payments", CreditCard],
+  ["messages", "Messages", MessageSquareText],
   ["audit", "Audit log", FileClock],
 ];
 export default function AdminConsole() {
@@ -207,6 +211,14 @@ function Panel({
         mutate={mutate}
       />
     );
+  if (tab === "messages")
+    return (
+      <MessagesPanel
+        data={list as ContactMessage[]}
+        busy={busy}
+        mutate={mutate}
+      />
+    );
   return <AuditPanel data={list as AuditEntry[]} />;
 }
 function OverviewPanel({ data }: { data: Overview }) {
@@ -218,6 +230,7 @@ function OverviewPanel({ data }: { data: Overview }) {
     [BookOpenCheck, "Total bookings", safe.bookings || 0],
     [CreditCard, "Paid revenue", `$${(safe.revenue || 0).toLocaleString()}`],
     [Activity, "Pending payments", safe.pendingPayments || 0],
+    [MessageSquareText, "Unread messages", safe.unreadMessages || 0],
     [FileClock, "Audit events", safe.audits || 0],
   ] as const;
   return (
@@ -508,6 +521,32 @@ function PaymentsPanel({
     </DataShell>
   );
 }
+function MessagesPanel({ data, busy, mutate }: { data: ContactMessage[]; busy: string; mutate: (p: string, m?: string, b?: object) => Promise<void> }) {
+  return (
+    <DataShell empty={!data.length} label="No customer messages yet">
+      <div className="space-y-3 p-4">
+        {data.map((message) => (
+          <article className={`rounded-xl border p-5 ${message.status === "unread" ? "border-blue-200 bg-blue-50/40" : "border-slate-200"}`} key={message._id}>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex min-w-0 gap-3">
+                <span className={`grid size-11 shrink-0 place-items-center rounded-xl ${message.status === "unread" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"}`}><MessageSquareText size={19} /></span>
+                <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h3 className="font-black">{message.subject}</h3><Status value={message.status} /></div><p className="mt-1 font-semibold text-slate-700">{message.name}</p><a className="text-sm text-blue-700 hover:underline" href={`mailto:${message.email}`}>{message.email}</a></div>
+              </div>
+              <small className="text-slate-400">{new Date(message.createdAt).toLocaleString()}</small>
+            </div>
+            <p className="mt-4 whitespace-pre-wrap rounded-xl bg-white p-4 text-sm leading-6 text-slate-700 ring-1 ring-slate-100">{message.message}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button disabled={busy.includes(message._id)} onClick={() => mutate(`messages/${message._id}`, "PATCH", { status: message.status === "unread" ? "read" : "unread" })} className="action-btn"><MailOpen size={15} />{message.status === "unread" ? "Mark read" : "Mark unread"}</button>
+              <a className="action-btn" href={`mailto:${message.email}?subject=Re: ${encodeURIComponent(message.subject)}`}>Reply by email</a>
+              <button disabled={busy.includes(message._id)} onClick={() => confirm(`Delete message from ${message.email}?`) && mutate(`messages/${message._id}`, "DELETE")} className="action-btn !text-red-600"><Trash2 size={15} />Delete</button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </DataShell>
+  );
+}
+
 function AuditPanel({ data }: { data: AuditEntry[] }) {
   return (
     <DataShell

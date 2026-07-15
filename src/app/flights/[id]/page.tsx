@@ -1,4 +1,204 @@
-import {notFound} from "next/navigation";import Link from "next/link";import {Types} from "mongoose";import FlightGallery from "@/components/flights/FlightGallery";import FlightCard from "@/components/flights/FlightCard";import {flights} from "@/lib/flights";import {connectDB} from "@/lib/db";import {FlightModel} from "@/models/Flight";import type {Flight} from "@/types";import {ArrowRight,BriefcaseBusiness,CalendarDays,Clock3,Plane,ShieldCheck,Star,Users} from "lucide-react";
-export function generateStaticParams(){return flights.map(f=>({id:f.id}))}async function getFlight(id:string):Promise<Flight|undefined>{const seed=flights.find(x=>x.id===id);if(seed)return seed;if(!Types.ObjectId.isValid(id)||!await connectDB())return;const r=await FlightModel.findById(id).lean();if(!r)return;return {...r,id:String(r._id),_id:undefined,createdBy:r.createdBy?String(r.createdBy):undefined,createdAt:r.createdAt?new Date(r.createdAt).toISOString():new Date().toISOString()} as Flight}export async function generateMetadata({params}:{params:Promise<{id:string}>}){const {id}=await params;const f=await getFlight(id);return {title:f?.title||"Flight not found",description:f?.shortDescription}}
-export default async function Detail({params}:{params:Promise<{id:string}>}){const {id}=await params;const f=await getFlight(id);if(!f)notFound();return <><div className="page-head"><div className="container text-sm text-slate-500">Home / Flights / <span className="text-blue-600">{f.flightNumber}</span></div></div><section className="container py-10"><div className="grid gap-7 lg:grid-cols-[1.15fr_.85fr]"><FlightGallery image={f.image} images={f.images||[]} title={f.title}/><aside className="card p-7"><div className="flex justify-between"><span className="eyebrow">{f.airlineName}</span><span className="flex gap-1 font-bold"><Star fill="#f59e0b" color="#f59e0b" size={18}/>{f.rating}</span></div><h1 className="my-5 text-3xl font-black">{f.title}</h1><p className="muted">{f.shortDescription}</p><div className="my-7 flex items-center justify-between rounded-2xl bg-slate-50 p-5 text-center"><div><b className="text-2xl">{f.departureTime}</b><p className="text-sm">{f.departureAirport}</p></div><div className="flex flex-1 items-center px-4 text-slate-400"><span className="h-px flex-1 bg-slate-300"/><Plane className="mx-2 text-blue-600"/><span className="h-px flex-1 bg-slate-300"/></div><div><b className="text-2xl">{f.arrivalTime}</b><p className="text-sm">{f.destinationAirport}</p></div></div><div className="grid grid-cols-2 gap-4 text-sm"><Info icon={<CalendarDays/>} label="Departure" value={f.departureDate}/><Info icon={<Clock3/>} label="Duration" value="5h 40m"/><Info icon={<Users/>} label="Seats" value={String(f.availableSeats)}/><Info icon={<BriefcaseBusiness/>} label="Baggage" value={f.baggageAllowance}/></div><div className="mt-7 flex items-end justify-between border-t pt-6"><div><span className="text-3xl font-black">${f.price}</span><small className="text-slate-500"> / person</small></div><Link href="/contact" className="btn btn-primary">Contact team <ArrowRight size={17}/></Link></div></aside></div><div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px]"><div className="card p-7"><h2 className="text-2xl font-black">Flight overview</h2><p className="muted mt-4">{f.fullDescription}</p><div className="mt-7 grid gap-4 md:grid-cols-3">{[["Aircraft",f.aircraftType],["Travel class",f.travelClass],["Flight number",f.flightNumber]].map(x=><div className="rounded-xl bg-slate-50 p-4" key={x[0]}><small className="text-slate-500">{x[0]}</small><p className="mt-1 font-bold">{x[1]}</p></div>)}</div></div><div className="card p-7"><ShieldCheck className="text-emerald-500" size={30}/><h3 className="mt-4 font-black">Verified route information</h3><p className="muted mt-2 text-sm">Schedules and operational details are reviewed before publication.</p></div></div><section className="card mt-6 p-7"><div className="flex items-center justify-between"><div><h2 className="text-2xl font-black">Traveller rating</h2><p className="muted mt-2">Consolidated service rating for this airline and route.</p></div><div className="text-right"><b className="text-4xl">{f.rating}</b><div className="mt-1 flex text-amber-500">{[1,2,3,4,5].map(n=><Star key={n} size={16} fill="currentColor"/>)}</div></div></div></section><div className="mt-14"><h2 className="section-title !text-3xl">Related flights</h2><div className="grid-4">{flights.filter(x=>x.id!==f.id).slice(0,4).map(x=><FlightCard flight={x} key={x.id}/>)}</div></div></section></>}
-function Info({icon,label,value}:{icon:React.ReactNode;label:string;value:string}){return <div className="flex gap-3"><span className="text-blue-600 [&>svg]:size-5">{icon}</span><div><small className="text-slate-500">{label}</small><p className="font-bold">{value}</p></div></div>}
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Types } from "mongoose";
+import FlightGallery from "@/components/flights/FlightGallery";
+import FlightCard from "@/components/flights/FlightCard";
+import { flights } from "@/lib/flights";
+import { connectDB } from "@/lib/db";
+import { FlightModel } from "@/models/Flight";
+import type { Flight } from "@/types";
+import {
+  BriefcaseBusiness,
+  CalendarDays,
+  Clock3,
+  CreditCard,
+  Plane,
+  ShieldCheck,
+  Star,
+  Users,
+} from "lucide-react";
+export function generateStaticParams() {
+  return flights.map((f) => ({ id: f.id }));
+}
+async function getFlight(id: string): Promise<Flight | undefined> {
+  const seed = flights.find((x) => x.id === id);
+  if (seed) return seed;
+  if (!Types.ObjectId.isValid(id) || !(await connectDB())) return;
+  const r = await FlightModel.findById(id).lean();
+  if (!r) return;
+  return {
+    ...r,
+    id: String(r._id),
+    _id: undefined,
+    createdBy: r.createdBy ? String(r.createdBy) : undefined,
+    createdAt: r.createdAt
+      ? new Date(r.createdAt).toISOString()
+      : new Date().toISOString(),
+  } as Flight;
+}
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const f = await getFlight(id);
+  return {
+    title: f?.title || "Flight not found",
+    description: f?.shortDescription,
+  };
+}
+export default async function Detail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const f = await getFlight(id);
+  if (!f) notFound();
+  return (
+    <>
+      <div className="page-head">
+        <div className="container text-sm text-slate-500">
+          Home / Flights /{" "}
+          <span className="text-blue-600">{f.flightNumber}</span>
+        </div>
+      </div>
+      <section className="container py-10">
+        <div className="grid gap-7 lg:grid-cols-[1.15fr_.85fr]">
+          <FlightGallery
+            image={f.image}
+            images={f.images || []}
+            title={f.title}
+          />
+          <aside className="card p-7">
+            <div className="flex justify-between">
+              <span className="eyebrow">{f.airlineName}</span>
+              <span className="flex gap-1 font-bold">
+                <Star fill="#f59e0b" color="#f59e0b" size={18} />
+                {f.rating}
+              </span>
+            </div>
+            <h1 className="my-5 text-3xl font-black">{f.title}</h1>
+            <p className="muted">{f.shortDescription}</p>
+            <div className="my-7 flex items-center justify-between rounded-2xl bg-slate-50 p-5 text-center">
+              <div>
+                <b className="text-2xl">{f.departureTime}</b>
+                <p className="text-sm">{f.departureAirport}</p>
+              </div>
+              <div className="flex flex-1 items-center px-4 text-slate-400">
+                <span className="h-px flex-1 bg-slate-300" />
+                <Plane className="mx-2 text-blue-600" />
+                <span className="h-px flex-1 bg-slate-300" />
+              </div>
+              <div>
+                <b className="text-2xl">{f.arrivalTime}</b>
+                <p className="text-sm">{f.destinationAirport}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <Info
+                icon={<CalendarDays />}
+                label="Departure"
+                value={f.departureDate}
+              />
+              <Info icon={<Clock3 />} label="Duration" value="5h 40m" />
+              <Info
+                icon={<Users />}
+                label="Seats"
+                value={String(f.availableSeats)}
+              />
+              <Info
+                icon={<BriefcaseBusiness />}
+                label="Baggage"
+                value={f.baggageAllowance}
+              />
+            </div>
+            <div className="mt-7 flex items-end justify-between border-t pt-6">
+              <div>
+                <span className="text-3xl font-black">${f.price}</span>
+                <small className="text-slate-500"> / person</small>
+              </div>
+              <Link href={`/flights/${f.id}/book`} className="btn btn-primary">
+                Book flight <CreditCard size={17} />
+              </Link>
+            </div>
+          </aside>
+        </div>
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="card p-7">
+            <h2 className="text-2xl font-black">Flight overview</h2>
+            <p className="muted mt-4">{f.fullDescription}</p>
+            <div className="mt-7 grid gap-4 md:grid-cols-3">
+              {[
+                ["Aircraft", f.aircraftType],
+                ["Travel class", f.travelClass],
+                ["Flight number", f.flightNumber],
+              ].map((x) => (
+                <div className="rounded-xl bg-slate-50 p-4" key={x[0]}>
+                  <small className="text-slate-500">{x[0]}</small>
+                  <p className="mt-1 font-bold">{x[1]}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card p-7">
+            <ShieldCheck className="text-emerald-500" size={30} />
+            <h3 className="mt-4 font-black">Verified route information</h3>
+            <p className="muted mt-2 text-sm">
+              Schedules and operational details are reviewed before publication.
+            </p>
+          </div>
+        </div>
+        <section className="card mt-6 p-7">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black">Traveller rating</h2>
+              <p className="muted mt-2">
+                Consolidated service rating for this airline and route.
+              </p>
+            </div>
+            <div className="text-right">
+              <b className="text-4xl">{f.rating}</b>
+              <div className="mt-1 flex text-amber-500">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star key={n} size={16} fill="currentColor" />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        <div className="mt-14">
+          <h2 className="section-title !text-3xl">Related flights</h2>
+          <div className="grid-4">
+            {flights
+              .filter((x) => x.id !== f.id)
+              .slice(0, 4)
+              .map((x) => (
+                <FlightCard flight={x} key={x.id} />
+              ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+function Info({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex gap-3">
+      <span className="text-blue-600 [&>svg]:size-5">{icon}</span>
+      <div>
+        <small className="text-slate-500">{label}</small>
+        <p className="font-bold">{value}</p>
+      </div>
+    </div>
+  );
+}

@@ -11,8 +11,10 @@ FlightOps is a professional full-stack airline operations and flight discovery p
 - Dynamic flight detail pages with an interactive media gallery, schedules, baggage, aircraft and related routes
 - JWT authentication in HTTP-only cookies, bcrypt password hashing and demo access
 - Protected MongoDB flight creation and responsive owner flight management with view/delete actions
+- Authenticated seat reservations with pending-payment booking records and Stripe-ready card checkout UI
 - Role-based Admin Center with user roles, blocking and account deletion
 - Flight approval/rejection, booking and payment status management
+- Persistent contact messages with verified user identity, read/unread state and admin email reply actions
 - Persistent administrative audit trail for every privileged action
 - Recharts operations dashboard and landing statistics calculated from current database records
 - MongoDB/Mongoose models, Zod validation and typed Next.js API routes
@@ -53,11 +55,11 @@ Demo accounts work without MongoDB. Registration and persistent flight creation 
 
 Public: `/`, `/flights`, `/flights/[id]`, `/about`, `/contact`, `/login`, `/register`, `/privacy`, `/terms`.
 
-Protected: `/dashboard`, `/flights/add`, `/flights/manage`.
+Protected: `/dashboard`, `/flights/add`, `/flights/manage`, `/flights/[id]/book`.
 
 Admin-only: `/admin`. Seed stable admin demonstration records with `npm run seed:admin`.
 
-API: `/api/auth/*`, `/api/flights`, `/api/flights/[id]`, `/api/flights/manage`, `/api/dashboard/stats`, `/api/contact`, and `/api/admin/*`.
+API: `/api/auth/*`, `/api/flights`, `/api/flights/[id]`, `/api/flights/manage`, `/api/bookings`, `/api/dashboard/stats`, `/api/contact`, and `/api/admin/*`.
 
 ## Deployment
 
