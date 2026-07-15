@@ -72,6 +72,13 @@ export default function AdminConsole() {
   useEffect(() => {
     load();
   }, [load]);
+  function selectTab(nextTab: Tab) {
+    if (nextTab === tab) return;
+    setLoading(true);
+    setError("");
+    setData(null);
+    setTab(nextTab);
+  }
   async function mutate(path: string, method = "PATCH", body?: object) {
     setBusy(path);
     try {
@@ -103,7 +110,7 @@ export default function AdminConsole() {
         {tabs.map(([id, label, Icon]) => (
           <button
             key={id}
-            onClick={() => setTab(id)}
+            onClick={() => selectTab(id)}
             className={`mb-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold ${tab === id ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}
           >
             <Icon size={18} />
@@ -161,11 +168,12 @@ function Panel({
   busy: string;
   mutate: (p: string, m?: string, b?: object) => Promise<void>;
 }) {
+  const list = Array.isArray(data) ? data : [];
   if (tab === "overview") return <OverviewPanel data={data as Overview} />;
   if (tab === "users")
     return (
       <UsersPanel
-        data={(data || []) as AdminUser[]}
+        data={list as AdminUser[]}
         busy={busy}
         mutate={mutate}
       />
@@ -173,7 +181,7 @@ function Panel({
   if (tab === "flights")
     return (
       <FlightsPanel
-        data={(data || []) as AdminFlight[]}
+        data={list as AdminFlight[]}
         busy={busy}
         mutate={mutate}
       />
@@ -181,7 +189,7 @@ function Panel({
   if (tab === "bookings")
     return (
       <BookingsPanel
-        data={(data || []) as Booking[]}
+        data={list as Booking[]}
         busy={busy}
         mutate={mutate}
       />
@@ -189,12 +197,12 @@ function Panel({
   if (tab === "payments")
     return (
       <PaymentsPanel
-        data={(data || []) as Payment[]}
+        data={list as Payment[]}
         busy={busy}
         mutate={mutate}
       />
     );
-  return <AuditPanel data={(data || []) as AuditEntry[]} />;
+  return <AuditPanel data={list as AuditEntry[]} />;
 }
 function OverviewPanel({ data }: { data: Overview }) {
   const safe = data || ({} as Overview);
