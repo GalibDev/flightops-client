@@ -39,7 +39,7 @@ const aircraft = ["Boeing 737-800", "Boeing 777-300ER", "Boeing 787-8 Dreamliner
 const list = (values: string[]) => values.map((value) => ({ value }));
 
 const fields: Field[] = [
-  { name: "airlineName", label: "Airline name", options: airlines.map((value) => ({ value })), placeholder: "Select an airline" },
+  { name: "airlineName", label: "Airline name", list: list(airlines), placeholder: "Type or select an airline" },
   { name: "airlineLogo", label: "Airline logo URL (optional)", optional: true, placeholder: "https://..." },
   { name: "flightNumber", label: "Flight number", placeholder: "Example: BG-147" },
   { name: "title", label: "Flight title", placeholder: "Example: Dhaka to Dubai direct flight" },

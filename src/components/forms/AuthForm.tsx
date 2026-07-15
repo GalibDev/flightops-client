@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,9 +21,8 @@ const schema = z
   });
 type Form = z.infer<typeof schema>;
 
-export default function AuthForm({ mode, redirectTo = "/dashboard" }: { mode: "login" | "register"; redirectTo?: string }) {
+export default function AuthForm({ mode, redirectTo = "/" }: { mode: "login" | "register"; redirectTo?: string }) {
   const [show, setShow] = useState(false);
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -48,8 +46,7 @@ export default function AuthForm({ mode, redirectTo = "/dashboard" }: { mode: "l
       }
       toast.success(result?.message || "Success");
       window.dispatchEvent(new Event("flightops-auth"));
-      router.push(redirectTo);
-      router.refresh();
+      window.location.replace(redirectTo);
     } catch (error) {
       toast.error(
         error instanceof DOMException && error.name === "AbortError"
