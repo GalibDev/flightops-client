@@ -22,7 +22,7 @@ FlightOps is a professional full-stack airline operations and flight discovery p
 
 ## Technology
 
-Next.js App Router, React, TypeScript, Tailwind CSS, Recharts, MongoDB, Mongoose, JWT (`jose`), bcryptjs, React Hook Form, Zod, Lucide and Sonner.
+Next.js App Router, React, TypeScript, Tailwind CSS, Recharts, MongoDB, Mongoose, Stripe Checkout, JWT (`jose`), bcryptjs, React Hook Form, Zod, Lucide and Sonner.
 
 ## Setup
 
@@ -38,6 +38,9 @@ Configure:
 MONGODB_URI=mongodb://localhost:27017/flightops
 JWT_SECRET=replace-with-a-long-random-secret
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 Run quality checks with `npm run typecheck`, `npm run lint` and `npm run build`. Seed MongoDB with `npm run seed` after configuring `MONGODB_URI`.
@@ -67,7 +70,7 @@ API: `/api/auth/*`, `/api/flights`, `/api/flights/[id]`, `/api/flights/manage`, 
 - Client repository: `https://github.com/GalibDev/flightops-client`
 - Server repository: `https://github.com/GalibDev/flightops-server`
 
-For Vercel, import the client repository and configure `MONGODB_URI`, `JWT_SECRET`, and `NEXT_PUBLIC_BASE_URL` in Project Settings → Environment Variables. `MONGODB_URI` must be a MongoDB Atlas connection string because Vercel cannot connect to the local Windows MongoDB service. Set `NEXT_PUBLIC_BASE_URL` to the final `https://...vercel.app` domain, then redeploy.
+For Vercel, import the client repository and configure `MONGODB_URI`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `STRIPE_WEBHOOK_SECRET` in Project Settings → Environment Variables. `MONGODB_URI` must be a MongoDB Atlas connection string because Vercel cannot connect to the local Windows MongoDB service. Register the public `/api/stripe/webhook` endpoint in Stripe Workbench, then redeploy after adding its signing secret.
 
 ## Optional production integrations
 

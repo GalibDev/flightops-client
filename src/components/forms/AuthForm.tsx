@@ -22,7 +22,7 @@ const schema = z
   });
 type Form = z.infer<typeof schema>;
 
-export default function AuthForm({ mode }: { mode: "login" | "register" }) {
+export default function AuthForm({ mode, redirectTo = "/dashboard" }: { mode: "login" | "register"; redirectTo?: string }) {
   const [show, setShow] = useState(false);
   const router = useRouter();
   const {
@@ -48,7 +48,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       }
       toast.success(result?.message || "Success");
       window.dispatchEvent(new Event("flightops-auth"));
-      router.push("/dashboard");
+      router.push(redirectTo);
       router.refresh();
     } catch (error) {
       toast.error(
