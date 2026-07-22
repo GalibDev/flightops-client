@@ -156,14 +156,14 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-WALKAI_API_KEY=sk-...
-WALKAI_MODEL=your-enabled-model-id
-WALKAI_BASE_URL=https://walkai.top/v1
+ANTHROPIC_BASE_URL=https://walkai.top
+ANTHROPIC_AUTH_TOKEN=sk-...
+ANTHROPIC_MODEL=your-enabled-model-id
 ```
 
 Never commit `.env.local` or expose database, JWT or Stripe secret keys in client-side code.
 
-The chatbot calls WalkAI only from the server route. Use the exact model ID enabled for your WalkAI key; the display name shown in the WalkAI dashboard may differ from its API model ID.
+The chatbot calls WalkAI's Anthropic-compatible `/v1/messages` endpoint only from the server route. Use the exact model ID enabled for your WalkAI key; the display name shown in the WalkAI dashboard may differ from its API model ID. Claude Code-only settings such as `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_ATTRIBUTION_HEADER` are not required by the deployed chatbot.
 
 Start the development server:
 

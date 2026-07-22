@@ -24,11 +24,11 @@ Never claim to complete a booking or payment. Direct booking questions to a flig
 For account-specific or payment problems, direct the visitor to /contact. Do not request passwords, card details, passport numbers, API keys, or other secrets.`;
 
 export async function POST(request: Request) {
-  const apiKey = process.env.WALKAI_API_KEY;
-  const model = process.env.WALKAI_MODEL;
-  const baseUrl = (process.env.WALKAI_BASE_URL || "https://walkai.top/v1").replace(/\/$/, "");
+  const authToken = process.env.ANTHROPIC_AUTH_TOKEN;
+  const model = process.env.ANTHROPIC_MODEL;
+  const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://walkai.top").replace(/\/$/, "");
 
-  if (!apiKey || !model) {
+  if (!authToken || !model) {
     return NextResponse.json(
       { success: false, message: "AI assistant is not configured yet." },
       { status: 503 },
@@ -37,15 +37,17 @@ export async function POST(request: Request) {
 
   try {
     const { messages } = requestSchema.parse(await request.json());
-    const response = await fetch(`${baseUrl}/chat/completions`, {
+    const response = await fetch(`${baseUrl}/v1/messages`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${authToken}`,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
+        system: SYSTEM_PROMPT,
+        messages,
         temperature: 0.35,
         max_tokens: 500,
       }),
@@ -63,12 +65,12 @@ export async function POST(request: Request) {
     }
 
     const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string | Array<{ text?: string }> } }>;
+      content?: Array<{ type?: string; text?: string }>;
     };
-    const rawContent = data.choices?.[0]?.message?.content;
-    const content = Array.isArray(rawContent)
-      ? rawContent.map((part) => part.text || "").join("")
-      : rawContent;
+    const content = data.content
+      ?.filter((part) => part.type === "text")
+      .map((part) => part.text || "")
+      .join("");
 
     if (!content?.trim()) {
       throw new Error("WalkAI returned an empty response");
