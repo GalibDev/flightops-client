@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, LoaderCircle, MessageCircle, Send, Sparkles, X } from "lucide-react";
+import { LoaderCircle, Plane, Send, Sparkles, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -11,6 +11,17 @@ const welcome: ChatMessage = {
 };
 
 const suggestions = ["Find flights from Dhaka", "How do I book?", "Baggage allowance"];
+
+function FlightOpsAIMark({ compact = false }: { compact?: boolean }) {
+  return (
+    <span className={`ai-logo relative grid shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50 to-blue-200 text-blue-700 shadow-lg ring-1 ring-white/70 ${compact ? "size-10" : "size-15"}`}>
+      <span className="absolute -left-3 top-1/2 h-px w-20 -rotate-45 bg-blue-400/35" />
+      <Plane className="relative -rotate-12" size={compact ? 21 : 27} strokeWidth={2.35} />
+      <Sparkles className="absolute right-1.5 top-1.5 text-amber-500" size={compact ? 10 : 13} strokeWidth={2.5} />
+      {!compact && <span className="absolute bottom-1.5 right-2 rounded bg-blue-700 px-1 text-[8px] font-black leading-3 tracking-wide text-white">AI</span>}
+    </span>
+  );
+}
 
 export default function AIChatbot() {
   const [open, setOpen] = useState(false);
@@ -72,7 +83,7 @@ export default function AIChatbot() {
         >
           <header className="flex items-center justify-between bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-4 text-white">
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-2xl bg-white/15 ring-1 ring-white/25"><Bot size={22} /></span>
+              <FlightOpsAIMark compact />
               <div><h2 className="font-extrabold">FlightOps AI</h2><p className="flex items-center gap-1 text-xs text-blue-100"><span className="size-2 rounded-full bg-emerald-300" /> Online assistant</p></div>
             </div>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close chat" className="grid size-9 place-items-center rounded-xl hover:bg-white/15"><X size={20} /></button>
@@ -105,8 +116,9 @@ export default function AIChatbot() {
         </section>
       )}
 
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={open ? "Close AI assistant" : "Open AI assistant"} className="group ml-auto flex size-15 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-600/30 transition hover:-translate-y-1 hover:bg-blue-700">
-        {open ? <X size={25} /> : <span className="relative"><MessageCircle size={27} /><Sparkles className="absolute -right-2 -top-2 text-amber-300" size={14} /></span>}
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-label={open ? "Close AI assistant" : "Open AI assistant"} className={`ai-launcher group relative ml-auto flex size-16 items-center justify-center rounded-[22px] shadow-xl shadow-blue-600/25 transition hover:scale-105 ${open ? "bg-slate-900 text-white" : "bg-blue-600"}`}>
+        {!open && <span className="absolute inset-0 rounded-[22px] ring-1 ring-blue-400/30" />}
+        {open ? <X size={25} /> : <FlightOpsAIMark />}
       </button>
     </div>
   );
