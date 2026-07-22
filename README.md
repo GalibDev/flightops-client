@@ -35,6 +35,7 @@ FlightOps is a full-stack airline operations and flight discovery platform built
 ### Public experience
 
 - Responsive landing page with an animated hero slider, destination carousel, operational statistics, benefits, call-to-action and other meaningful sections
+- Site-wide bilingual AI travel assistant powered through a secure server-side WalkAI integration
 - Flight explorer with search, airline and cabin-class filtering, price filtering, sorting and pagination
 - Consistent flight cards with image, route, schedule, fare, availability and details action
 - Public flight details with an image gallery, itinerary, duration, aircraft, baggage allowance, seat availability and related routes
@@ -155,9 +156,14 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+WALKAI_API_KEY=sk-...
+WALKAI_MODEL=your-enabled-model-id
+WALKAI_BASE_URL=https://walkai.top/v1
 ```
 
 Never commit `.env.local` or expose database, JWT or Stripe secret keys in client-side code.
+
+The chatbot calls WalkAI only from the server route. Use the exact model ID enabled for your WalkAI key; the display name shown in the WalkAI dashboard may differ from its API model ID.
 
 Start the development server:
 
