@@ -156,14 +156,14 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-ANTHROPIC_BASE_URL=https://walkai.top
-ANTHROPIC_AUTH_TOKEN=sk-...
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
+GROK_BASE_URL=https://walkai.top/v1
+GROK_API_KEY=sk-...
+GROK_MODEL=grok-4.5
 ```
 
 Never commit `.env.local` or expose database, JWT or Stripe secret keys in client-side code.
 
-The chatbot calls WalkAI's Anthropic-compatible `/v1/messages` endpoint only from the server route. `ANTHROPIC_MODEL` is optional: when omitted, the app uses `claude-sonnet-4-20250514`. Set it only if WalkAI provides a different enabled model ID. Claude Code-only settings such as `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` and `CLAUDE_CODE_ATTRIBUTION_HEADER` are not required by the deployed chatbot.
+The chatbot calls WalkAI's Responses-compatible `/v1/responses` endpoint only from the server route. `GROK_MODEL` is optional: when omitted, the app uses `grok-4.5`. The API key must never be exposed through a `NEXT_PUBLIC_` variable.
 
 Start the development server:
 
