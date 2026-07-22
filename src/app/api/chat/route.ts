@@ -23,20 +23,49 @@ Never invent live availability, prices, policies, booking confirmations, or flig
 Never claim to complete a booking or payment. Direct booking questions to a flight's details page and its Book now action.
 For account-specific or payment problems, direct the visitor to /contact. Do not request passwords, card details, passport numbers, API keys, or other secrets.`;
 
+const OFFLINE_HELP = "I'm temporarily in offline help mode. I can still help with finding flights, booking steps, baggage, payments, login, and contacting support.";
+
+function offlineAnswer(message: string) {
+  const text = message.toLowerCase();
+  if (/book|booking|reserve|ticket|বুক/.test(text)) {
+    return "To book a flight: open Explore Flights, choose a flight, select View details, then click Book now. Log in, enter the passenger and seat details, and continue to secure Stripe checkout.";
+  }
+  if (/baggage|luggage|bag|ব্যাগ|লাগেজ/.test(text)) {
+    return "Baggage allowance is shown on each flight's details page because it can vary by flight. Open Explore Flights, select a flight, and check the Baggage allowance section before booking.";
+  }
+  if (/find|search|flight|dhaka|dubai|route|ফ্লাইট|ঢাকা/.test(text)) {
+    return "Open Explore Flights to see current routes from Dhaka. You can search by destination and filter by airline, travel class, and price. Open a flight card to confirm its schedule, fare, and available seats.";
+  }
+  if (/pay|payment|stripe|card|পেমেন্ট/.test(text)) {
+    return "FlightOps uses secure Stripe Checkout for payments. Choose a flight and complete the booking form to continue to payment. For a payment problem, please use the Contact page—never share card details in chat.";
+  }
+  if (/login|log in|register|account|sign up|লগইন/.test(text)) {
+    return "Use Login if you already have an account, or Sign up to create one. You need to be logged in to book a flight and access your dashboard.";
+  }
+  if (/contact|support|help|যোগাযোগ/.test(text)) {
+    return "Open the Contact page from the navigation menu to send a message to the FlightOps support team. For account or payment issues, include a short description but never send passwords or card details.";
+  }
+  return OFFLINE_HELP;
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.GROK_API_KEY;
   const model = process.env.GROK_MODEL || "grok-4.5";
   const baseUrl = (process.env.GROK_BASE_URL || "https://walkai.top/v1").replace(/\/$/, "");
 
-  if (!apiKey) {
-    return NextResponse.json(
-      { success: false, message: "AI assistant is not configured yet." },
-      { status: 503 },
-    );
-  }
-
   try {
     const { messages } = requestSchema.parse(await request.json());
+    const latestMessage = [...messages].reverse().find((message) => message.role === "user")?.content || "";
+    const preparedAnswer = offlineAnswer(latestMessage);
+
+    if (preparedAnswer !== OFFLINE_HELP) {
+      return NextResponse.json({ success: true, data: { content: preparedAnswer, offline: true } });
+    }
+
+    if (!apiKey) {
+      return NextResponse.json({ success: true, data: { content: preparedAnswer, offline: true } });
+    }
+
     const response = await fetch(`${baseUrl}/responses`, {
       method: "POST",
       headers: {
@@ -57,10 +86,7 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const upstreamMessage = await response.text();
       console.error("WalkAI request failed", response.status, upstreamMessage.slice(0, 500));
-      return NextResponse.json(
-        { success: false, message: "The AI assistant is temporarily unavailable." },
-        { status: 502 },
-      );
+      return NextResponse.json({ success: true, data: { content: preparedAnswer, offline: true } });
     }
 
     const data = (await response.json()) as {
@@ -89,9 +115,6 @@ export async function POST(request: Request) {
       );
     }
     console.error("Chat route error", error);
-    return NextResponse.json(
-      { success: false, message: "The AI assistant could not respond. Please try again." },
-      { status: 500 },
-    );
+    return NextResponse.json({ success: true, data: { content: OFFLINE_HELP, offline: true } });
   }
 }
