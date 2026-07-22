@@ -25,10 +25,10 @@ For account-specific or payment problems, direct the visitor to /contact. Do not
 
 export async function POST(request: Request) {
   const authToken = process.env.ANTHROPIC_AUTH_TOKEN;
-  const model = process.env.ANTHROPIC_MODEL;
+  const model = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514";
   const baseUrl = (process.env.ANTHROPIC_BASE_URL || "https://walkai.top").replace(/\/$/, "");
 
-  if (!authToken || !model) {
+  if (!authToken) {
     return NextResponse.json(
       { success: false, message: "AI assistant is not configured yet." },
       { status: 503 },
